@@ -35,9 +35,9 @@ cc_toolchain_config(
         "nm": "/usr/bin/nm",
         "objcopy": "/usr/bin/objcopy",
         "objdump": "/usr/bin/objdump",
-        "strip": "/usr/bin/strip"
+        "strip": "/usr/bin/strip",
         "as": "/usr/bin/as",
-        "size": "/usr/bin/size"
+        "size": "/usr/bin/size",
         "dwp": "/usr/bin/dwp",
     },
     flags = dicts.add(
