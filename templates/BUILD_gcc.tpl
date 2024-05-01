@@ -47,8 +47,7 @@ cc_toolchain_config(
             "##linkopts;copts":  "-no-canonical-prefixes;-fno-canonical-system-headers",
             "##linkopts/opt": "-Wl,--gc-sections",
             "##linkopts;copts/dbg": "-g",
-            "##copts/dbg": "-g0;-O2;-ffunction-sections;-fdata-sections",
-            "##defines/dbg": "-g0;-O2;-D_FORTIFY_SOURCE=1;-DNDEBUG;-ffunction-sections;-fdata-sections",
+            "##copts/dbg": "-g0;-O2;-D_FORTIFY_SOURCE=1;-DNDEBUG;-ffunction-sections;-fdata-sections",
         }
     ),
     enable_features = [
@@ -83,20 +82,18 @@ cc_toolchain_config(
         "-B/usr/bin",
         "-Wl,-no-as-needed",
         "-Wl,-z,relro,-z,now",
-        "-pass-exit-codes"
-    ] + %{linkopts},
-    defines = %{defines},
-    includedirs = %{includedirs},
-    linkdirs = %{linkdirs},
+        "-pass-exit-codes",
 
-    toolchain_libs = [
         "-Wl,--push-state,-as-needed",
         "-lstdc++",
         "-Wl,--pop-state",
         "-Wl,--push-state,-as-needed",
         "-lm",
         "-Wl,--pop-state"
-    ]
+    ] + %{linkopts},
+    defines = %{defines},
+    includedirs = %{includedirs},
+    linkdirs = %{linkdirs},
 )
 
 filegroup(name = "empty")
