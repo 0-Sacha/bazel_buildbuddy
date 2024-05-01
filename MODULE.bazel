@@ -1,0 +1,9 @@
+"""bazel_buildbuddy
+
+"""
+
+module(
+    name = "bazel_buildbuddy",
+    version = "0.0.1",
+    repo_name = "sacha_bazel_winlibs_mingw",
+)

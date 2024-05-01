@@ -1,0 +1,13 @@
+
+actions:
+  - name: "BuildBuddy Workflows"
+    triggers:
+      push:
+        branches:
+          - "*"
+      pull_request:
+        branches:
+          - "*"
+    bazel_commands:
+      - "test -s --config=rbe --remote_header=x-buildbuddy-api-key=${BUILDBUDDY_WINDOWS_WSL} //..."
+
