@@ -126,9 +126,9 @@ def buildbuddy_toolchain(
     _buildbuddy_toolchain(
         name = name,
         compiler = compiler,
-        gcc_version = archive["gcc_version"],
-        clang_version = archive["clang_version"],
-        docker_container = archive["docker_container"],
+        gcc_version = archive["details"]["gcc_version"],
+        clang_version = archive["details"]["clang_version"],
+        docker_container = archive["details"]["docker_container"],
 
         target_name = target_name,
         target_cpu = target_cpu,
@@ -145,8 +145,8 @@ def buildbuddy_toolchain(
         flags_packed = flags_packed,
     )
     
-    compiler_version = archive["gcc_version"]
+    compiler_version = archive["details"]["gcc_version"]
     if compiler == "clang":
-        compiler_version = archive["clang_version"]
+        compiler_version = archive["details"]["clang_version"]
 
-    native.register_toolchains("@{}//:toolchain_buildbuddy{}".format(name, compiler_version))
+    native.register_toolchains("@{}//:toolchain_buildbuddy_{}".format(name, compiler_version))
