@@ -11,7 +11,7 @@ def _buidbuddy_toolchain_impl(rctx):
     if rctx.attr.compiler == "clang":
         compiler_version = rctx.attr.clang_version
 
-    toolchain_id = "buildbuddy_{}".format(compiler_version)
+    toolchain_id = "buildbuddy_{}_{}".format(rctx.attr.compiler, compiler_version)
 
     substitutions = {
         "%{rctx_name}": rctx.name,
@@ -154,4 +154,4 @@ def buildbuddy_toolchain(
         if compiler == "clang":
             compiler_version = archive["details"]["clang_version"]
 
-        native.register_toolchains("@{}//:toolchain_buildbuddy_{}".format(name, compiler_version))
+        native.register_toolchains("@{}//:toolchain_buildbuddy_{}_{}".format(name, compiler, compiler_version))
