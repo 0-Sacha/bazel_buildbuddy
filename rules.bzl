@@ -92,7 +92,9 @@ def buildbuddy_toolchain(
         
         flags_packed = {},
 
-        registry = BUILDBUDDY_REGISTRY
+        registry = BUILDBUDDY_REGISTRY,
+
+        auto_register_toolchain = True
     ):
     """arm Toolchain
 
@@ -118,7 +120,9 @@ def buildbuddy_toolchain(
         
         flags_packed: pack of flags, checkout the syntax at bazel_utilities
 
-        registry:
+        registry: The registry to use
+
+        auto_register_toolchain: If the toolchain is registered to bazel using `register_toolchains`
     """
 
     archive = get_archive_from_registry(registry, "BuildBuddy", version)
@@ -145,8 +149,9 @@ def buildbuddy_toolchain(
         flags_packed = flags_packed,
     )
     
-    compiler_version = archive["details"]["gcc_version"]
-    if compiler == "clang":
-        compiler_version = archive["details"]["clang_version"]
+    if auto_register_toolchain:
+        compiler_version = archive["details"]["gcc_version"]
+        if compiler == "clang":
+            compiler_version = archive["details"]["clang_version"]
 
-    native.register_toolchains("@{}//:toolchain_buildbuddy_{}".format(name, compiler_version))
+        native.register_toolchains("@{}//:toolchain_buildbuddy_{}".format(name, compiler_version))
