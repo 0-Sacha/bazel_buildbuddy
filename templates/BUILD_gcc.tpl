@@ -1,10 +1,8 @@
 ""
 
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
 
 package(default_visibility = ["//visibility:public"])
-
 
 platform(
     name = "buildbuddy_%{host_name}",
@@ -16,16 +14,13 @@ platform(
     },
 )
 
-
 cc_toolchain_config(
     name = "cc_toolchain_config_%{toolchain_id}",
     toolchain_identifier = "%{toolchain_id}",
-    host_name = "%{host_name}",
-    target_name = "%{target_name}",
-    target_cpu = "%{target_cpu}",
-    compiler = None,
-    toolchain_bins = None,
-    compiler_paths = {
+
+    compiler_type = "gcc",
+
+    toolchain_paths = {
         "cpp": "/usr/bin/cpp",
         "cc": "/usr/bin/gcc",
         "cxx": "/usr/bin/g++",
@@ -40,19 +35,7 @@ cc_toolchain_config(
         "size": "/usr/bin/size",
         "dwp": "/usr/bin/dwp",
     },
-    flags = dicts.add(
-        %{flags_packed},
-        {
-            "##cov": "--coverage",
-            "##linkopts;copts":  "-no-canonical-prefixes;-fno-canonical-system-headers",
-            "##linkopts/opt": "-Wl,--gc-sections",
-            "##linkopts;copts/dbg": "-g",
-            "##copts/dbg": "-g0;-O2;-D_FORTIFY_SOURCE=1;-DNDEBUG;-ffunction-sections;-fdata-sections",
-        }
-    ),
-    enable_features = [
-        "supports_start_end_lib"    
-    ],
+
     cxx_builtin_include_directories = [
         "/usr/lib/gcc/x86_64-linux-gnu/%{gcc_version}/include",
         "/usr/include/x86_64-linux-gnu/c++/%{gcc_version}",
@@ -64,16 +47,8 @@ cc_toolchain_config(
     ],
 
     copts = [
-        "-fstack-protector",
         "-Wall",
         "-Wunused-but-set-parameter",
-        "-Wno-free-nonheap-object",
-        "-fno-omit-frame-pointer",
-        "-fno-canonical-system-headers",
-        "-Wno-builtin-macro-redefined",
-        "-D__DATE__=\"redacted\"",
-        "-D__TIMESTAMP__=\"redacted\"",
-        "-D__TIME__=\"redacted\""
     ] + %{copts},
     conlyopts = %{conlyopts},
     cxxopts = %{cxxopts},
@@ -86,14 +61,14 @@ cc_toolchain_config(
 
         "-Wl,--push-state,-as-needed",
         "-lstdc++",
-        "-Wl,--pop-state",
-        "-Wl,--push-state,-as-needed",
         "-lm",
         "-Wl,--pop-state"
     ] + %{linkopts},
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = %{linkdirs},
+
+    toolchain_libs = %{toolchain_libs},
 )
 
 filegroup(name = "empty")
