@@ -26,8 +26,6 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{docker_network}": "off",
         "%{docker_container}": "docker://docker.io/sachabellier/buildbuddy-rbe-images:latest",
 
-        "%{target_name}": rctx.attr.target_name,
-        "%{target_cpu}": rctx.attr.target_cpu,
         "%{exec_compatible_with}": json.encode(rctx.attr.exec_compatible_with),
         "%{target_compatible_with}": json.encode(rctx.attr.target_compatible_with),
 
@@ -38,8 +36,7 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{defines}": json.encode(rctx.attr.defines),
         "%{includedirs}": json.encode(rctx.attr.includedirs),
         "%{linkdirs}": json.encode(rctx.attr.linkdirs),
-
-        "%{flags_packed}": json.encode(rctx.attr.flags_packed),
+        "%{toolchain_libs}": json.encode(rctx.attr.toolchain_libs),
     }
     rctx.template(
         "BUILD",
@@ -67,8 +64,7 @@ _buildbuddy_toolchain = repository_rule(
         'defines': attr.string_list(default = []),
         'includedirs': attr.string_list(default = []),
         'linkdirs': attr.string_list(default = []),
-
-        'flags_packed': attr.string_dict(default = {}),
+        'toolchain_libs': attr.string_list(default = []),
     },
     local = False,
 )
@@ -89,9 +85,8 @@ def buildbuddy_toolchain(
         defines = [],
         includedirs = [],
         linkdirs = [],
+        toolchain_libs = [],
         
-        flags_packed = {},
-
         registry = BUILDBUDDY_REGISTRY,
 
         auto_register_toolchain = True
@@ -117,8 +112,7 @@ def buildbuddy_toolchain(
         defines: defines
         includedirs: includedirs
         linkdirs: linkdirs
-        
-        flags_packed: pack of flags, checkout the syntax at bazel_utilities
+        toolchain_libs: toolchain_libs
 
         registry: The registry to use
 
@@ -145,8 +139,7 @@ def buildbuddy_toolchain(
         defines = defines,
         includedirs = includedirs,
         linkdirs = linkdirs,
-
-        flags_packed = flags_packed,
+        toolchain_libs = toolchain_libs,
     )
     
     if auto_register_toolchain:
