@@ -46,24 +46,10 @@ cc_toolchain_config(
         "/usr/include",
     ],
 
-    copts = [
-        "-Wall",
-        "-Wunused-but-set-parameter",
-    ] + %{copts},
+    copts = %{copts},
     conlyopts = %{conlyopts},
     cxxopts = %{cxxopts},
-    linkopts = [
-        "-fuse-ld=gold",
-        "-B/usr/bin",
-        "-Wl,-no-as-needed",
-        "-Wl,-z,relro,-z,now",
-        "-pass-exit-codes",
-
-        "-Wl,--push-state,-as-needed",
-        "-lstdc++",
-        "-lm",
-        "-Wl,--pop-state"
-    ] + %{linkopts},
+    linkopts = %{linkopts},
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = %{linkdirs},
@@ -71,24 +57,24 @@ cc_toolchain_config(
     toolchain_libs = %{toolchain_libs},
 )
 
-filegroup(name = "empty")
-
 cc_toolchain(
     name = "cc_toolchain_%{toolchain_id}",
     toolchain_identifier = "%{toolchain_id}",
     toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
     
-    all_files = ":empty",
-    compiler_files = ":empty",
-    linker_files = ":empty",
-    ar_files = ":empty",
-    as_files = ":empty",
-    objcopy_files = ":empty",
-    strip_files = ":empty",
-    dwp_files = ":empty",
-    coverage_files = ":empty",
-    supports_param_files = 1,
-    module_map = None,
+    all_files = ":toolchain_every_files",
+    compiler_files = ":toolchain_every_files",
+    linker_files = ":toolchain_every_files",
+    ar_files = ":toolchain_every_files",
+    as_files = ":toolchain_every_files",
+    objcopy_files = ":toolchain_every_files",
+    strip_files = ":toolchain_every_files",
+    dwp_files = ":toolchain_every_files",
+    coverage_files = ":toolchain_every_files",
+
+    # dynamic_runtime_lib
+    # static_runtime_lib
+    # supports_param_files
 )
 
 toolchain(
@@ -98,4 +84,12 @@ toolchain(
 
     exec_compatible_with = %{exec_compatible_with},
     target_compatible_with = %{target_compatible_with},
+)
+
+
+filegroup(
+    name = "toolchain_every_files",
+    srcs = [
+        "%{toolchain_extras_filegroup}",
+    ]
 )
