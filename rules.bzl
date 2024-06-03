@@ -13,6 +13,12 @@ def _buidbuddy_toolchain_impl(rctx):
 
     toolchain_id = "buildbuddy_{}_{}".format(rctx.attr.compiler, compiler_version)
 
+    toolchain_extras_filegroup = "@{}//{}:{}".format(
+        rctx.attr.toolchain_extras_filegroup.repo_name,
+        rctx.attr.toolchain_extras_filegroup.package,
+        rctx.attr.toolchain_extras_filegroup.name,
+    )
+
     substitutions = {
         "%{rctx_name}": rctx.name,
         "%{rctx_path}": "external/{}/".format(rctx.name),
@@ -37,6 +43,8 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{includedirs}": json.encode(rctx.attr.includedirs),
         "%{linkdirs}": json.encode(rctx.attr.linkdirs),
         "%{toolchain_libs}": json.encode(rctx.attr.toolchain_libs),
+
+        "%{toolchain_extras_filegroup}": toolchain_extras_filegroup,
     }
     rctx.template(
         "BUILD",
@@ -52,8 +60,6 @@ _buildbuddy_toolchain = repository_rule(
         'clang_version': attr.string(mandatory = True),
         'docker_container': attr.string(mandatory = True),
 
-        'target_name': attr.string(default = "local"),
-        'target_cpu': attr.string(default = ""),
         'exec_compatible_with': attr.string_list(default = []),
         'target_compatible_with': attr.string_list(default = []),
 
@@ -65,6 +71,8 @@ _buildbuddy_toolchain = repository_rule(
         'includedirs': attr.string_list(default = []),
         'linkdirs': attr.string_list(default = []),
         'toolchain_libs': attr.string_list(default = []),
+    
+        'toolchain_extras_filegroup': attr.label(),
     },
     local = False,
 )
@@ -74,8 +82,7 @@ def buildbuddy_toolchain(
         compiler = "gcc",
         version = "latest",
 
-        target_name = "local",
-        target_cpu = "",
+        exec_compatible_with = [],
         target_compatible_with = [],
 
         copts = [],
@@ -86,6 +93,8 @@ def buildbuddy_toolchain(
         includedirs = [],
         linkdirs = [],
         toolchain_libs = [],
+
+        toolchain_extras_filegroup = "@bazel_utilities//:empty",
         
         registry = BUILDBUDDY_REGISTRY,
 
@@ -101,8 +110,7 @@ def buildbuddy_toolchain(
         compiler:
         version: 
 
-        target_name: The target name
-        target_cpu: The target cpu name
+        exec_compatible_with: The exec_compatible_with list for the toolchain
         target_compatible_with: The target_compatible_with list for the toolchain
 
         copts: copts
@@ -113,6 +121,8 @@ def buildbuddy_toolchain(
         includedirs: includedirs
         linkdirs: linkdirs
         toolchain_libs: toolchain_libs
+
+        toolchain_extras_filegroup: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
 
         registry: The registry to use
 
@@ -128,8 +138,7 @@ def buildbuddy_toolchain(
         clang_version = archive["details"]["clang_version"],
         docker_container = archive["details"]["docker_container"],
 
-        target_name = target_name,
-        target_cpu = target_cpu,
+        exec_compatible_with = exec_compatible_with,
         target_compatible_with = target_compatible_with,
 
         copts = copts,
@@ -140,6 +149,8 @@ def buildbuddy_toolchain(
         includedirs = includedirs,
         linkdirs = linkdirs,
         toolchain_libs = toolchain_libs,
+
+        toolchain_extras_filegroup = toolchain_extras_filegroup,
     )
     
     if auto_register_toolchain:
