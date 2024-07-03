@@ -3,6 +3,7 @@
 load("@bazel_buildbuddy//:registry.bzl", "BUILDBUDDY_REGISTRY")
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENTION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
+load("@bazel_utilities//toolchains:utils.bzl", "forward_envars")
 
 def _buidbuddy_toolchain_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
@@ -45,6 +46,8 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{toolchain_libs}": json.encode(rctx.attr.toolchain_libs),
 
         "%{toolchain_extras_filegroup}": toolchain_extras_filegroup,
+
+        "%{envars}": json.encode(forward_envars(rctx)),
     }
     rctx.template(
         "BUILD",

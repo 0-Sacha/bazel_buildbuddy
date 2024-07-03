@@ -55,6 +55,8 @@ cc_toolchain_config(
     linkdirs = %{linkdirs},
 
     toolchain_libs = %{toolchain_libs},
+
+    envars = %{envars},
 )
 
 cc_toolchain(
