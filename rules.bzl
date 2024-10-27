@@ -1,10 +1,9 @@
 ""
 
-load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
 load("@bazel_buildbuddy//:registry.bzl", "BUILDBUDDY_REGISTRY")
+load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENSION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
-load("@bazel_skylib//lib:sets.bzl", "sets")
 
 def _buidbuddy_toolchain_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
@@ -17,9 +16,9 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{rctx_path}": "external/{}/".format(rctx.name),
         "%{extention}": HOST_EXTENSION[host_os],
         "%{host_name}": host_name,
-        "%{toolchain_id}": "buildbuddy_{}".format(compiler_version),
-        "%{gcc_version}": archive["details"]["gcc_version"]
-        "%{clang_version}": archive["details"]["clang_version"]
+        "%{toolchain_id}": "buildbuddy_{}".format(rctx.attr.version),
+        "%{gcc_version}": archive["details"]["gcc_version"],
+        "%{clang_version}": archive["details"]["clang_version"],
 
         "%{host_os_capitalize}": host_os.capitalize(),
         "%{docker_network}": "off",
@@ -36,6 +35,11 @@ def _buidbuddy_toolchain_impl(rctx):
         "%{includedirs}": json.encode(rctx.attr.includedirs),
         "%{linkdirs}": json.encode(rctx.attr.linkdirs),
         "%{linklibs}": json.encode(rctx.attr.linklibs),
+        # dbg / opt
+        "%{dbg_copts}": json.encode(rctx.attr.dbg_copts),
+        "%{dbg_linkopts}": json.encode(rctx.attr.dbg_linkopts),
+        "%{opt_copts}": json.encode(rctx.attr.opt_copts),
+        "%{opt_linkopts}": json.encode(rctx.attr.opt_linkopts),
 
         "%{toolchain_extras_filegroups}": json.encode(filegroup_translate_to_starlark(rctx.attr.toolchain_extras_filegroups)),
     }
@@ -48,6 +52,7 @@ def _buidbuddy_toolchain_impl(rctx):
 _buildbuddy_toolchain = repository_rule(
     implementation = _buidbuddy_toolchain_impl,
     attrs = {
+        'version': attr.string(default = "latest"),
         'registry_json': attr.string(mandatory = True),
 
         'exec_compatible_with': attr.string_list(default = []),
@@ -61,6 +66,11 @@ _buildbuddy_toolchain = repository_rule(
         'includedirs': attr.string_list(default = []),
         'linkdirs': attr.string_list(default = []),
         'linklibs': attr.string_list(default = []),
+        # dbg / opt
+        'dbg_copts': attr.string_list(default = []),
+        'dbg_linkopts': attr.string_list(default = []),
+        'opt_copts': attr.string_list(default = []),
+        'opt_linkopts': attr.string_list(default = []),
     
         'toolchain_extras_filegroups': attr.label_list(default = []),
     },
@@ -81,6 +91,11 @@ def buildbuddy_toolchain(
         includedirs = [],
         linkdirs = [],
         linklibs = [],
+        # dbg / opt
+        dbg_copts = [],
+        dbg_linkopts = [],
+        opt_copts = [],
+        opt_linkopts = [],
 
         toolchain_extras_filegroups = [],
         
@@ -106,6 +121,12 @@ def buildbuddy_toolchain(
         includedirs: includedirs
         linkdirs: linkdirs
         linklibs: linklibs
+        # dbg / opt
+        linklibs: linklibs
+        dbg_copts: dbg_copts
+        dbg_linkopts: dbg_linkopts
+        opt_copts: opt_copts
+        opt_linkopts: opt_linkopts
 
         toolchain_extras_filegroups: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
 
@@ -115,6 +136,7 @@ def buildbuddy_toolchain(
 
     _buildbuddy_toolchain(
         name = name,
+        version = version,
         registry_json = json.encode(registry),
 
         exec_compatible_with = exec_compatible_with,
@@ -128,6 +150,11 @@ def buildbuddy_toolchain(
         includedirs = includedirs,
         linkdirs = linkdirs,
         linklibs = linklibs,
+        # dbg / opt
+        dbg_copts = dbg_copts,
+        dbg_linkopts = dbg_linkopts,
+        opt_copts = opt_copts,
+        opt_linkopts = opt_linkopts,
 
         toolchain_extras_filegroups = toolchain_extras_filegroups,
     )
@@ -138,7 +165,6 @@ def _buildbuddy_toolchain_extension_impl(module_ctx):
         for toolchain in mod.tags.buildbuddy_toolchain:
             buildbuddy_toolchain(
                 name = toolchain.name,
-                registry_json = toolchain.registry_json,
 
                 exec_compatible_with = toolchain.exec_compatible_with,
                 target_compatible_with = toolchain.target_compatible_with,
@@ -151,6 +177,11 @@ def _buildbuddy_toolchain_extension_impl(module_ctx):
                 includedirs = toolchain.includedirs,
                 linkdirs = toolchain.linkdirs,
                 linklibs = toolchain.linklibs,
+                # dbg / opt
+                dbg_copts = toolchain.dbg_copts,
+                dbg_linkopts = toolchain.dbg_linkopts,
+                opt_copts = toolchain.opt_copts,
+                opt_linkopts = toolchain.opt_linkopts,
 
                 toolchain_extras_filegroups = toolchain.toolchain_extras_filegroups,
             )
@@ -172,6 +203,11 @@ buildbuddy_toolchain_extension = module_extension(
             'includedirs': attr.string_list(default = []),
             'linkdirs': attr.string_list(default = []),
             'linklibs': attr.string_list(default = []),
+            # dbg / opt
+            'dbg_copts': attr.string_list(default = []),
+            'dbg_linkopts': attr.string_list(default = []),
+            'opt_copts': attr.string_list(default = []),
+            'opt_linkopts': attr.string_list(default = []),
         
             'toolchain_extras_filegroups': attr.label_list(default = []),
         }),
