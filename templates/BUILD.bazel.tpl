@@ -5,7 +5,7 @@ load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_confi
 package(default_visibility = ["//visibility:public"])
 
 platform(
-    name = "buildbuddy_%{host_name}",
+    name = "platform",
     constraint_values = %{exec_compatible_with},
     exec_properties = {
         "OSFamily": "%{host_os_capitalize}",
@@ -15,8 +15,8 @@ platform(
 )
 
 cc_toolchain_config(
-    name = "cc_toolchain_config_%{toolchain_id}",
-    toolchain_identifier = "%{toolchain_id}",
+    name = "gcc-cc_toolchain_config_%{toolchain_id}",
+    toolchain_identifier = "gcc-%{toolchain_id}",
 
     compiler_type = "gcc",
 
@@ -54,23 +54,23 @@ cc_toolchain_config(
     includedirs = %{includedirs},
     linkdirs = %{linkdirs},
 
-    toolchain_libs = %{toolchain_libs},
+    linklibs = %{linklibs},
 )
 
 cc_toolchain(
-    name = "cc_toolchain_%{toolchain_id}",
-    toolchain_identifier = "%{toolchain_id}",
-    toolchain_config = ":cc_toolchain_config_%{toolchain_id}",
+    name = "gcc-cc_toolchain_%{toolchain_id}",
+    toolchain_identifier = "gcc-%{toolchain_id}",
+    toolchain_config = ":gcc-cc_toolchain_config_%{toolchain_id}",
     
-    all_files = ":toolchain_every_files",
-    compiler_files = ":toolchain_every_files",
-    linker_files = ":toolchain_every_files",
-    ar_files = ":toolchain_every_files",
-    as_files = ":toolchain_every_files",
-    objcopy_files = ":toolchain_every_files",
-    strip_files = ":toolchain_every_files",
-    dwp_files = ":toolchain_every_files",
-    coverage_files = ":toolchain_every_files",
+    all_files = ":toolchain_extra_files",
+    compiler_files = ":toolchain_extra_files",
+    linker_files = ":toolchain_extra_files",
+    ar_files = ":toolchain_extra_files",
+    as_files = ":toolchain_extra_files",
+    objcopy_files = ":toolchain_extra_files",
+    strip_files = ":toolchain_extra_files",
+    dwp_files = ":toolchain_extra_files",
+    coverage_files = ":toolchain_extra_files",
 
     # dynamic_runtime_lib
     # static_runtime_lib
@@ -78,8 +78,8 @@ cc_toolchain(
 )
 
 toolchain(
-    name = "toolchain_%{toolchain_id}",
-    toolchain = ":cc_toolchain_%{toolchain_id}",
+    name = "gcc-toolchain",
+    toolchain = ":gcc-cc_toolchain_%{toolchain_id}",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 
     exec_compatible_with = %{exec_compatible_with},
@@ -88,8 +88,6 @@ toolchain(
 
 
 filegroup(
-    name = "toolchain_every_files",
-    srcs = [
-        "%{toolchain_extras_filegroup}",
-    ]
+    name = "toolchain_extra_files",
+    srcs = %{toolchain_extras_filegroups}
 )
