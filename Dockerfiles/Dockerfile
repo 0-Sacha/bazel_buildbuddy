@@ -23,7 +23,8 @@ RUN apt-get update && \
         zip \
         ca-certificates \
         gnupg \
-        lsb-release
+        lsb-release \
+        libc6
 
 RUN update-alternatives --install /usr/bin/gcc              gcc          /usr/bin/gcc-14          10 \
     && update-alternatives --install /usr/bin/g++           g++          /usr/bin/g++-14          10 \
