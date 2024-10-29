@@ -1,0 +1,21 @@
+""
+
+# buildifier: disable=module-docstring
+module(
+    name = "bazel_buildbuddy_examples",
+    version = "0.1",
+)
+
+git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="7f6c3585c41278918428ed48d45b12413c197fc0")
+local_path_override(module_name = "bazel_buildbuddy", path = "../")
+
+bazel_dep(name = "rules_cc", version = "0.0.10")
+bazel_dep(name = "platforms", version = "0.0.10")
+bazel_dep(name = "bazel_utilities", version = "0.0.1")
+bazel_dep(name = "bazel_buildbuddy")
+
+buildbuddy_toolchain_extension = use_extension("@bazel_buildbuddy//:rules.bzl", "buildbuddy_toolchain_extension")
+inject_repo(buildbuddy_toolchain_extension, "platforms", "bazel_utilities")
+buildbuddy_toolchain_extension.buildbuddy_toolchain(name = "buildbuddy")
+use_repo(buildbuddy_toolchain_extension, "buildbuddy")
+# register_toolchains("@buildbuddy//:gcc-toolchain")
