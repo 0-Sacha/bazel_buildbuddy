@@ -1,0 +1,18 @@
+# Common
+common --enable_platform_specific_config
+
+# BuildBuddy
+common:linux --workspace_status_command=$(pwd)/.buildbuddy/workspace_status.sh
+common:windows --workspace_status_command=.buildbuddy/workspace_status.bat
+#
+common:buildbuddy --build_metadata=ROLE=CI
+common:buildbuddy --bes_results_url=https://sacha.buildbuddy.io/invocation/
+common:buildbuddy --bes_backend=grpcs://sacha.buildbuddy.io
+common:buildbuddy --remote_cache=grpcs://sacha.buildbuddy.io
+common:buildbuddy --remote_executor=grpcs://sacha.buildbuddy.io
+common:buildbuddy --experimental_remote_cache_compression
+common:buildbuddy --jobs=50
+#
+common:buildbuddy --extra_execution_platforms=@buildbuddy//:platform
+common:buildbuddy --extra_toolchains=@buildbuddy//:gcc-toolchain
+common:buildbuddy --platforms=@buildbuddy//:platform
