@@ -3,6 +3,7 @@
 # bazel_buildbuddy
 
 A Bazel module that configures a buildbuddy CI toolchain. using an Ubuntu 23.04 with gcc-14 and clang-18 installed (see the Dockerfile) for use of up to `c++23`.
+Probably not needed if you don't need a recent `ubuntu image`, see [linux-image-configuration](https://www.buildbuddy.io/docs/workflows-config/#linux-image-configuration)
 
 ## How to Use
 MODULE.bazel
