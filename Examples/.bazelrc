@@ -2,8 +2,8 @@
 common --enable_platform_specific_config
 
 # BuildBuddy
-common:linux --workspace_status_command=$(pwd)/../.buildbuddy/workspace_status.sh
-common:windows --workspace_status_command=../.buildbuddy/workspace_status.bat
+common:linux --workspace_status_command=$(pwd)/.buildbuddy/workspace_status.sh
+common:windows --workspace_status_command=.buildbuddy/workspace_status.bat
 #
 common:buildbuddy --build_metadata=ROLE=CI
 common:buildbuddy --bes_results_url=https://sacha.buildbuddy.io/invocation/
