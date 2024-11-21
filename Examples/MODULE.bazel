@@ -6,7 +6,7 @@ module(
     version = "0.1",
 )
 
-git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="7f6c3585c41278918428ed48d45b12413c197fc0")
+git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="aa399bb2599e2cd64a35a2275ce0f73a539524a5")
 local_path_override(module_name = "bazel_buildbuddy", path = "../")
 
 bazel_dep(name = "rules_cc", version = "0.0.10")

@@ -36,7 +36,7 @@ cc_toolchain_config(
         "dwp": "/usr/bin/dwp",
     },
 
-    cxx_builtin_include_directories = [
+    toolchain_builtin_includedirs_extra = [
         "/usr/lib/gcc/x86_64-linux-gnu/%{gcc_version}/include",
         "/usr/include/x86_64-linux-gnu/c++/%{gcc_version}",
         "/usr/include/c++/%{gcc_version}",
