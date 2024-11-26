@@ -2,11 +2,13 @@
 
 load("@bazel_buildbuddy//:registry.bzl", "BUILDBUDDY_REGISTRY")
 load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_to_starlark")
-load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "HOST_EXTENSION")
+load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "split_host_name", "HOST_EXTENSION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
 
 def _buidbuddy_toolchain_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
+    if rctx.attr.override_host_name != "" and rctx.attr.override_host_name != "local":
+        host_os, _, host_name = split_host_name(rctx.attr.override_host_name)
 
     registry = json.decode(rctx.attr.registry_json)
     archive = get_archive_from_registry(registry, "BuildBuddy", rctx.attr.version)
@@ -52,6 +54,8 @@ def _buidbuddy_toolchain_impl(rctx):
 _buildbuddy_toolchain = repository_rule(
     implementation = _buidbuddy_toolchain_impl,
     attrs = {
+        'override_host_name': attr.string(default = ""),
+
         'version': attr.string(default = "latest"),
         'registry_json': attr.string(mandatory = True),
 
@@ -100,6 +104,8 @@ def buildbuddy_toolchain(
         toolchain_extras_filegroups = [],
         
         registry = BUILDBUDDY_REGISTRY,
+        
+        override_host_name = "local",
     ):
     """arm Toolchain
 
@@ -131,8 +137,9 @@ def buildbuddy_toolchain(
         toolchain_extras_filegroups: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
 
         registry: The registry to use
-    """
 
+        override_host_name: To override the host_name
+    """
 
     _buildbuddy_toolchain(
         name = name,
@@ -157,6 +164,8 @@ def buildbuddy_toolchain(
         opt_linkopts = opt_linkopts,
 
         toolchain_extras_filegroups = toolchain_extras_filegroups,
+
+        override_host_name = override_host_name,
     )
 
 
@@ -184,12 +193,16 @@ def _buildbuddy_toolchain_extension_impl(module_ctx):
                 opt_linkopts = toolchain.opt_linkopts,
 
                 toolchain_extras_filegroups = toolchain.toolchain_extras_filegroups,
+
+                override_host_name = toolchain.override_host_name,
             )
     
 buildbuddy_toolchain_extension = module_extension(
     implementation = _buildbuddy_toolchain_extension_impl,
     tag_classes = {
         "buildbuddy_toolchain": tag_class(attrs = {
+            'override_host_name': attr.string(default = "local"),
+            
             'name': attr.string(mandatory = True),
 
             'exec_compatible_with': attr.string_list(default = []),
