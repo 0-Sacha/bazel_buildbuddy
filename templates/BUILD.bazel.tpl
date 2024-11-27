@@ -53,8 +53,12 @@ cc_toolchain_config(
     defines = %{defines},
     includedirs = %{includedirs},
     linkdirs = %{linkdirs},
-
     linklibs = %{linklibs},
+    # dbg / opt
+    dbg_copts = %{dbg_copts},
+    dbg_linkopts = %{dbg_linkopts},
+    opt_copts = %{opt_copts},
+    opt_linkopts = %{opt_linkopts},
 )
 
 cc_toolchain(
