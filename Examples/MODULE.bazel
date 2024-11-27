@@ -10,7 +10,9 @@ bazel_dep(name = "rules_cc", version = "0.0.10")
 bazel_dep(name = "platforms", version = "0.0.10")
 
 git_override(module_name="bazel_utilities", remote="https://github.com/0-Sacha/bazel_utilities.git", commit="fbb17685ac9ba78fef914a322e6c37839dc16d4f")
+# Replace with git_override from my repo `https://github.com/0-Sacha/bazel_buildbuddy.git`
 local_path_override(module_name = "bazel_buildbuddy", path = "../")
+
 bazel_dep(name = "bazel_utilities", version = "0.0.1", dev_dependency = True)
 bazel_dep(name = "bazel_buildbuddy", dev_dependency = True)
 
