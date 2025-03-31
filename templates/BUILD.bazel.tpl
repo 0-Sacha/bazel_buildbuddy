@@ -44,7 +44,11 @@ cc_toolchain_config(
         "/usr/local/include",
         "/usr/include/x86_64-linux-gnu",
         "/usr/include",
-    ],
+    ] + %{toolchain_builtin_includedirs_isystem},
+    
+    toolchain_builtin_includedirs = [
+    ] + %{toolchain_builtin_includedirs},
+
 
     copts = %{copts},
     conlyopts = %{conlyopts},
