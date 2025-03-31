@@ -60,7 +60,7 @@ buildbuddy_toolchain = repository_rule(
         'override_host_name': attr.string(default = ""),
 
         'version': attr.string(default = "latest"),
-        'registry_json': attr.string(mandatory = True),
+        'registry_json': attr.string(default = json.encode(BUILDBUDDY_REGISTRY)),
 
         'exec_compatible_with': attr.string_list(default = []),
         'target_compatible_with': attr.string_list(default = []),
