@@ -5,7 +5,7 @@ load("@bazel_utilities//toolchains:extras_filegroups.bzl", "filegroup_translate_
 load("@bazel_utilities//toolchains:hosts.bzl", "get_host_infos_from_rctx", "split_host_name", "HOST_EXTENSION")
 load("@bazel_utilities//toolchains:registry.bzl", "get_archive_from_registry")
 
-def _buidbuddy_toolchain_impl(rctx):
+def _buildbuddy_toolchain_impl(rctx):
     host_os, _, host_name = get_host_infos_from_rctx(rctx.os.name, rctx.os.arch)
     if rctx.attr.override_host_name != "" and rctx.attr.override_host_name != "local":
         host_os, _, host_name = split_host_name(rctx.attr.override_host_name)
@@ -16,7 +16,7 @@ def _buidbuddy_toolchain_impl(rctx):
     substitutions = {
         "%{rctx_name}": rctx.name,
         "%{rctx_path}": "external/{}/".format(rctx.name),
-        "%{extention}": HOST_EXTENSION[host_os],
+        "%{extension}": HOST_EXTENSION[host_os],
         "%{host_name}": host_name,
         "%{toolchain_id}": "buildbuddy_{}".format(rctx.attr.version),
         "%{gcc_version}": archive["details"]["gcc_version"],
@@ -28,6 +28,9 @@ def _buidbuddy_toolchain_impl(rctx):
 
         "%{exec_compatible_with}": json.encode(rctx.attr.exec_compatible_with),
         "%{target_compatible_with}": json.encode(rctx.attr.target_compatible_with),
+
+        "%{toolchain_builtin_includedirs_isystem}": json.encode(rctx.attr.toolchain_builtin_includedirs_isystem),
+        "%{toolchain_builtin_includedirs}": json.encode(rctx.attr.toolchain_builtin_includedirs),
 
         "%{copts}": json.encode(rctx.attr.copts),
         "%{conlyopts}": json.encode(rctx.attr.conlyopts),
@@ -51,16 +54,19 @@ def _buidbuddy_toolchain_impl(rctx):
         substitutions
     )
 
-_buildbuddy_toolchain = repository_rule(
-    implementation = _buidbuddy_toolchain_impl,
+buildbuddy_toolchain = repository_rule(
+    implementation = _buildbuddy_toolchain_impl,
     attrs = {
         'override_host_name': attr.string(default = ""),
 
         'version': attr.string(default = "latest"),
-        'registry_json': attr.string(mandatory = True),
+        'registry_json': attr.string(default = json.encode(BUILDBUDDY_REGISTRY)),
 
         'exec_compatible_with': attr.string_list(default = []),
         'target_compatible_with': attr.string_list(default = []),
+
+        'toolchain_builtin_includedirs_isystem': attr.string_list(default = []),
+        'toolchain_builtin_includedirs': attr.string_list(default = []),
 
         'copts': attr.string_list(default = []),
         'conlyopts': attr.string_list(default = []),
@@ -80,95 +86,6 @@ _buildbuddy_toolchain = repository_rule(
     },
 )
 
-def buildbuddy_toolchain(
-        name,
-        version = "latest",
-
-        exec_compatible_with = [],
-        target_compatible_with = [],
-
-        copts = [],
-        conlyopts = [],
-        cxxopts = [],
-        linkopts = [],
-        defines = [],
-        includedirs = [],
-        linkdirs = [],
-        linklibs = [],
-        # dbg / opt
-        dbg_copts = [],
-        dbg_linkopts = [],
-        opt_copts = [],
-        opt_linkopts = [],
-
-        toolchain_extras_filegroups = [],
-        
-        registry = BUILDBUDDY_REGISTRY,
-        
-        override_host_name = "local",
-    ):
-    """arm Toolchain
-
-    This macro create a repository containing all files needded to get an hermetic toolchain
-
-    Args:
-        name: Name of the repo that will be created
-        
-        version: 
-
-        exec_compatible_with: The exec_compatible_with list for the toolchain
-        target_compatible_with: The target_compatible_with list for the toolchain
-
-        copts: copts
-        conlyopts: conlyopts
-        cxxopts: cxxopts
-        linkopts: linkopts
-        defines: defines
-        includedirs: includedirs
-        linkdirs: linkdirs
-        linklibs: linklibs
-        # dbg / opt
-        linklibs: linklibs
-        dbg_copts: dbg_copts
-        dbg_linkopts: dbg_linkopts
-        opt_copts: opt_copts
-        opt_linkopts: opt_linkopts
-
-        toolchain_extras_filegroups: filegroup added to the cc_toolchain rule to get access to thoses files when sandboxed
-
-        registry: The registry to use
-
-        override_host_name: To override the host_name
-    """
-
-    _buildbuddy_toolchain(
-        name = name,
-        version = version,
-        registry_json = json.encode(registry),
-
-        exec_compatible_with = exec_compatible_with,
-        target_compatible_with = target_compatible_with,
-
-        copts = copts,
-        conlyopts = conlyopts,
-        cxxopts = cxxopts,
-        linkopts = linkopts,
-        defines = defines,
-        includedirs = includedirs,
-        linkdirs = linkdirs,
-        linklibs = linklibs,
-        # dbg / opt
-        dbg_copts = dbg_copts,
-        dbg_linkopts = dbg_linkopts,
-        opt_copts = opt_copts,
-        opt_linkopts = opt_linkopts,
-
-        toolchain_extras_filegroups = toolchain_extras_filegroups,
-
-        override_host_name = override_host_name,
-    )
-
-
 def _buildbuddy_toolchain_extension_impl(module_ctx):
     for mod in module_ctx.modules:
         for toolchain in mod.tags.buildbuddy_toolchain:
@@ -177,6 +94,9 @@ def _buildbuddy_toolchain_extension_impl(module_ctx):
 
                 exec_compatible_with = toolchain.exec_compatible_with,
                 target_compatible_with = toolchain.target_compatible_with,
+
+                toolchain_builtin_includedirs_isystem = toolchain.toolchain_builtin_includedirs_isystem,
+                toolchain_builtin_includedirs = toolchain.toolchain_builtin_includedirs,
                 
                 copts = toolchain.copts,
                 conlyopts = toolchain.conlyopts,
@@ -207,6 +127,9 @@ buildbuddy_toolchain_extension = module_extension(
 
             'exec_compatible_with': attr.string_list(default = []),
             'target_compatible_with': attr.string_list(default = []),
+
+            'toolchain_builtin_includedirs_isystem': attr.string_list(default = []),
+            'toolchain_builtin_includedirs': attr.string_list(default = []),
 
             'copts': attr.string_list(default = []),
             'conlyopts': attr.string_list(default = []),
