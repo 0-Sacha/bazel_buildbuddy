@@ -1,6 +1,6 @@
 ""
 
-load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@bazel_utilities//toolchains:cc_toolchain_config.bzl", "cc_toolchain_config_path")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -14,7 +14,7 @@ platform(
     },
 )
 
-cc_toolchain_config(
+cc_toolchain_config_path(
     name = "gcc-cc_toolchain_config_%{toolchain_id}",
     toolchain_identifier = "gcc-%{toolchain_id}",
 
